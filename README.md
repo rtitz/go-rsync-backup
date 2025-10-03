@@ -16,6 +16,8 @@ A robust, cross-platform backup tool built in Go that wraps rsync with advanced 
 
 ## Installation
 
+> **⚠️ macOS Users**: You must grant **Full Disk Access** to the backup binary to avoid "Operation not permitted" errors when backing up system files. The application will automatically prompt you if this permission is missing.
+
 ```bash
 cd src
 go build -o backup .
@@ -58,6 +60,8 @@ Create or modify `config.json`:
 | `show_progress` | Show real-time progress | true |
 
 ## Usage
+
+> **⚠️ macOS Users**: Ensure the backup binary has **Full Disk Access** permissions before running. The tool will check and guide you through granting this permission if needed.
 
 ### Basic Usage
 ```bash
@@ -166,6 +170,7 @@ The tool provides comprehensive error handling:
 - **rsync 3.2.0+** recommended (Homebrew version on macOS)
 - **Root privileges** for system-level backups
 - **SSH keys** configured for remote backups
+- **Full Disk Access** (macOS only) - Required to backup system files and preserve file flags
 
 ## Platform Support
 

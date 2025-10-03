@@ -27,6 +27,8 @@ type Backup struct {
 }
 
 func main() {
+	fmt.Printf("%s - %s\n", AppName, AppVersion)
+
 	// Parse command line arguments
 	configFile := flag.String("config", "config.json", "Configuration file path")
 	dryRun := flag.Bool("dry-run", false, "Perform a dry run (no changes)")
@@ -38,6 +40,26 @@ func main() {
 		fmt.Println("Usage: backup [options]")
 		flag.PrintDefaults()
 		os.Exit(0)
+	}
+
+	// Check Full Disk Access on macOS
+	if runtime.GOOS == "darwin" {
+		if err := checkFullDiskAccess(); err != nil {
+			exePath, _ := os.Executable()
+			fmt.Printf("Full Disk Access required: %v\n", err)
+			fmt.Printf("Please grant Full Disk Access to: %s\n", exePath)
+			fmt.Println("Steps:")
+			fmt.Println("1. Open System Preferences/Settings > Security & Privacy > Privacy")
+			fmt.Println("2. Select 'Full Disk Access' from the left sidebar")
+			fmt.Println("3. Click the lock icon and enter your password")
+			fmt.Printf("4. Click '+' and add: %s\n", exePath)
+			fmt.Println("5. Try running the backup again")
+			fmt.Println("\nOpening System Preferences...")
+			exec.Command("open", "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles").Run()
+			os.Exit(1)
+		} else {
+			fmt.Println("Full Disk Access: OK")
+		}
 	}
 
 	// Check if running as root
@@ -465,10 +487,10 @@ func (b *Backup) runRsync(lastBackup string) error {
 	time.Sleep(time.Millisecond * 3000)
 
 	cmd := exec.Command(b.config.RsyncBin, args...)
-	
+
 	// Use buffers to capture output while displaying it
 	var stdoutBuf, stderrBuf strings.Builder
-	
+
 	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {
 		return err
@@ -507,7 +529,7 @@ func (b *Backup) parseTransferredGB(statsOutput string) float64 {
 		`sent ([0-9,]+) bytes`,
 		`total size is ([0-9,]+)`,
 	}
-	
+
 	for _, pattern := range patterns {
 		re := regexp.MustCompile(pattern)
 		matches := re.FindStringSubmatch(statsOutput)
@@ -526,13 +548,13 @@ func (b *Backup) finalizeBackup() error {
 	if b.config.DryRun {
 		return nil // Skip for dry runs
 	}
-	
+
 	// Rename from _INCOMPLETE to final name
 	finalDir := filepath.Join(b.config.Destination, b.timestamp)
 	if err := os.Rename(b.snapDir, finalDir); err != nil {
 		return fmt.Errorf("failed to rename backup directory: %v", err)
 	}
-	
+
 	// Update snapDir to final name
 	b.snapDir = finalDir
 	b.log("Backup finalized: %s", b.timestamp)

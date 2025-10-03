@@ -1,5 +1,10 @@
 package main
 
+const (
+	AppName    = "Go-Rsync-Backup"
+	AppVersion = "1.0.1"
+)
+
 // Default configuration values
 var DefaultConfig = Config{
 	Source:           "/Volumes/external-0",

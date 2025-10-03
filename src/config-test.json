@@ -1,0 +1,12 @@
+{
+  "source": "/Volumes/external-0/Fotos",
+  "destination": "/Volumes/backup-0/backups-test",
+  "keep": 30,
+  "cleanup_at_percent": 95,
+  "exclude_list": "/Volumes/external-0/.backup-exclude.list",
+  "log_file": "/Volumes/backup-0/backups-test/backup.log",
+  "lock_file": "/Volumes/external-0/.backupRunningLock-TEST",
+  "dry_run": false,
+  "force_system_rsync": false,
+  "show_progress": true
+}
